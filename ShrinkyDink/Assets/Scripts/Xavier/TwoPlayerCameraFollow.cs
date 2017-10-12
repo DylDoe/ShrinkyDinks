@@ -36,7 +36,7 @@ public class TwoPlayerCameraFollow : MonoBehaviour
 	public float camSizeSmoothTime;
 
 	float camViewSize; // 2 Player mode
-	Camera cam;
+	public Camera cam;
 
 	bool lookAheadStopped;
 
@@ -59,7 +59,7 @@ public class TwoPlayerCameraFollow : MonoBehaviour
 	{
 		focusArea = new FocusArea (target.playerCollider.bounds, focusAreaSize);
 		focusAreaTwo = new FocusAreaTwo (targetTwo.playerCollider.bounds, focusAreaSizeTwo); // 2 Player mode
-		cam = this.GetComponent<Camera>();
+		//cam = this.GetComponent<Camera>();
 	}
 
 
@@ -169,8 +169,6 @@ public class TwoPlayerCameraFollow : MonoBehaviour
 			top += shiftY;
 			center = new Vector2((left + right) / 2, (top + bottom) / 2);
 			velocity = new Vector2(shiftX, shiftY);
-			
-			Debug.Log("update 1");
 		}
 	}
 
@@ -222,8 +220,6 @@ public class TwoPlayerCameraFollow : MonoBehaviour
 			topTwo += shiftYTwo;
 			centerTwo = new Vector2((leftTwo + rightTwo) / 2, (topTwo + bottomTwo) / 2);
 			velocityTwo = new Vector2(shiftXTwo, shiftYTwo);
-			
-			Debug.Log("update 2");
 		}
 	}
 

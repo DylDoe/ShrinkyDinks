@@ -29,6 +29,27 @@ public class Player : MonoBehaviour
 	Controller2D controller;
 
 
+// Dash Stuff
+
+	[Header("Player Dash Attributes")]
+	public float dashTime;
+	public float dashDistance;
+	public float dashCooldown;
+	float dashRefreshTime;
+	bool canDash;
+
+	[HideInInspector]
+	public bool isDashing;
+
+	[HideInInspector]
+	public float lastDirection;
+
+	float dashSpeed;
+
+	float timer;
+	float timeSinceBegining; //
+
+
 
 	void Start () 
 	{
@@ -37,35 +58,83 @@ public class Player : MonoBehaviour
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
 		maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-		print ("Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
+
+		timer = 0.0f;
 	}
 
 
 
 	void Update()
 	{
-		CalculateVeloctiy();
+		if (!isDashing)
+		{
+			CalculateVeloctiy();
+		}
 
 		controller.Move(velocity * Time.deltaTime);
 
-		if (controller.collisions.above || controller.collisions.below)
+		if (controller.collisions.above || controller.collisions.below || isDashing)
 		{
 			velocity.y = 0;
 		}	
+
+		lastDirection = Mathf.Sign(velocity.x);
+
+// Dash Stuff
+
+		dashRefreshTime += Time.deltaTime;
+
+		if (dashRefreshTime >= dashCooldown)
+		{
+			canDash = true;
+		}
+		else 
+		{
+			canDash = false;
+		}
+
+		if(!isDashing)
+		{
+			timeSinceBegining = Time.time;
+		}
+
+
+		DeterminingDashVelocity();
+
+
+		if (isDashing)
+		{
+			timer = Time.time - timeSinceBegining;
+
+			if (timer >= dashTime)
+			{
+				isDashing = false;
+				dashRefreshTime = 0.0f;
+			}
+
+			//transform.Translate(Vector3.right * lastDirection * dashSpeed * Time.deltaTime);
+
+			velocity =  Vector3.right * lastDirection * dashSpeed;
+
+
+		} //
 	}
 
 
 
 	public void SetDirectionalInput (Vector2 input)
 	{
-		directionalInput = input;
+		if (!isDashing)
+		{
+			directionalInput = input;
+		}
 	}
 
 
 
 	public void OnJumpInputDown()
 	{
-		if (controller.collisions.below)
+		if (controller.collisions.below && !isDashing)
 		{
 			velocity.y = maxJumpVelocity;
 		}
@@ -75,10 +144,27 @@ public class Player : MonoBehaviour
 
 	public void OnJumpInputUp()
 	{
-		if (velocity.y > minJumpVelocity)
+		if (velocity.y > minJumpVelocity && !isDashing)
 		{
 			velocity.y = minJumpVelocity;
 		}
+	}
+
+
+
+	public void OnDashInput()
+	{
+		if (canDash)
+		{
+			isDashing = true;
+		}
+	}
+
+
+
+	void DeterminingDashVelocity()
+	{
+		dashSpeed = dashDistance/dashTime;
 	}
 
 
