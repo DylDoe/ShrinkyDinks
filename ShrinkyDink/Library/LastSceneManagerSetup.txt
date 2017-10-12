@@ -1,4 +1,8 @@
 sceneSetups:
+<<<<<<< HEAD
 - path: Assets/_Scenes/X_EnemyTest.unity
+=======
+- path: Assets/_Scenes/X_LevelChange.unity
+>>>>>>> master
   isLoaded: 1
   isActive: 1
