@@ -46,8 +46,9 @@ public class Bullet : MonoBehaviour {
 
 	//Bullet collisions
 	void OnTriggerEnter2D (Collider2D other){
+		Debug.Log(other.name);
 		//Destroy bullet if it hits a platform or tries to leave screen
-		if (other.name == "Platform" || other.name == "ScreenEdge") {
+		if (other.name == "Platform" || other.name == "ScreenEdge" || other.tag != "Enemy") {
 			Destroy (this.gameObject);
 			//if goThrough is active, do divided amount of damage to each enemy until goThroughNumber is zero, then destroy bullet
 		} else if (goThrough) {

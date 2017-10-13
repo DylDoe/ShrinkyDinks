@@ -8,6 +8,8 @@ public class XGroundMelee : MonoBehaviour {
 	private GameObject currentPlatform;
 	public float speed;
 	private RaycastHit2D ray;
+	private RaycastHit2D ray2;
+	public LayerMask whatever;
 	private RaycastHit2D view;
 	public float viewRange;
 	public GameObject Player1;
@@ -76,10 +78,18 @@ public class XGroundMelee : MonoBehaviour {
 
 		if (check == 0) {
 			this.transform.Translate (Vector2.right * speed * Time.deltaTime);
-			view = Physics2D.Raycast(transform.position, Vector2.right, 10f);
+			view = Physics2D.Raycast(transform.position, Vector2.right, 10f, whatever);
+			ray2 = Physics2D.Raycast(transform.position, Vector2.right, 1f, whatever);
+			Debug.DrawRay(transform.position, Vector2.right);
+			if(ray2.collider != null)
+			check = 1;
 		} else {
 			this.transform.Translate (Vector2.left * speed * Time.deltaTime);
-			view = Physics2D.Raycast(transform.position, Vector2.left, 10f);
+			view = Physics2D.Raycast(transform.position, Vector2.left, 10f, whatever);
+			ray2 = Physics2D.Raycast(transform.position, Vector2.left, 1f, whatever);
+			Debug.DrawRay(transform.position, Vector2.left);
+			if(ray2.collider != null)
+			check = 0;
 		}
 		if(currentPlatform)
 		{

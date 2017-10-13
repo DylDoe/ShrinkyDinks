@@ -38,6 +38,7 @@ public class ChargedBullet : MonoBehaviour {
 	public float timer;
 
 	public float selfDestructTime;
+	public GameObject overChargeEffect;
 	
 	
 
@@ -70,6 +71,7 @@ public class ChargedBullet : MonoBehaviour {
 			timer += Time.deltaTime;
 			if (timer >= selfDestructTime)
 			{
+				Instantiate(overChargeEffect, this.transform.position, this.transform.rotation);
 				Destroy(this.gameObject);
 			}
 		}
