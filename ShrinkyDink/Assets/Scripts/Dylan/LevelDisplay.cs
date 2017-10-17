@@ -31,7 +31,7 @@ public class LevelDisplay : MonoBehaviour {
 
 		if (higherLevel = true){
 			string levelD = ((startLevel += levelF)*0.5f).ToString();
-			levelText.text = levelD;}
+			levelText.text = "Lv." + levelD;}
 			//minutes + ":" + seconds;
 	}
 		
