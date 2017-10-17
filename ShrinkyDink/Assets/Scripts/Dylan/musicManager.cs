@@ -39,7 +39,7 @@ public class musicManager : MonoBehaviour {
 		}
 		else if(triggerID == 1)
 		{
-			PlayMusic(0);
+			PlayMusic(1);
 		}
 		else if(triggerID == 2)
 		{

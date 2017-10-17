@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class musicTriggers : MonoBehaviour 
+public class musicTrigger : MonoBehaviour 
 {
 	//--- TRIGGER VARIABLES
 	[Header("TRIGGER SETTINGS")]
