@@ -25,6 +25,7 @@ public class AIO_LevelChange : MonoBehaviour
 	public GameObject upLevelChanger;
 
 	public int levelLenght = 10;
+	public int subLevelLenght = 3;
 	public GameObject[] levelPieces;
 
 	public GameObject previousLevel; // TURN IT INTO AN ARRAY YO
@@ -46,6 +47,9 @@ public class AIO_LevelChange : MonoBehaviour
 	public AIO_PlayerDies player1DiesScript;
 	public AIO_PlayerDies player2DiesScript;
 
+	public PlayerLevel PL1;
+	public PlayerLevel PL2;
+
 	//public List<Vector3> previousLevelPlayerPositions1 = new List<Vector3>();
 	//public List<Vector3> previousLevelPlayerPositions2 = new List<Vector3>();
 
@@ -56,12 +60,23 @@ public class AIO_LevelChange : MonoBehaviour
 	//public int currentMainLevel = 0;
 	//public int currentSubLevel = 0;
 
+	public TurnOffOtherScripts scriptsOnOff1;
+	public TurnOffOtherScripts scriptsOnOff2;
+
+	public GameObject player1DeadFX;
+	public GameObject player2DeadFX;
 
 
 	void Start () 
 	{
 		player1 = GameObject.FindGameObjectWithTag("Player");
 		player2 = GameObject.FindGameObjectWithTag("Player2");
+
+		PL1 = player1.GetComponent<PlayerLevel>();
+		PL2 = player2.GetComponent<PlayerLevel>();
+
+		scriptsOnOff1 = player1.GetComponent<TurnOffOtherScripts>();
+		scriptsOnOff2 = player2.GetComponent<TurnOffOtherScripts>();
 
 		nextSpawnLoc1 = currentSpawnLoc1 - distBetweenLevels;
 		nextSpawnLoc2 = currentSpawnLoc2 - distBetweenLevels;
@@ -78,21 +93,58 @@ public class AIO_LevelChange : MonoBehaviour
 		{
 			Instantiate(levelPieces[Random.Range(0,levelPieces.Length)], new Vector2(i * 100.0f, levelCount * 100.0f), this.transform.rotation, GameObject.Find("SubLevel0" + levelCount).transform);
 		}
+
+		float upLvlChngXpos = upLevelChanger.transform.position.x;
+
+		upLvlChngXpos = levelLenght * 100f;
+
+		upLevelChanger.transform.position = new Vector3(upLvlChngXpos, upLevelChanger.transform.position.y, upLevelChanger.transform.position.z);
 	}
 	
 
 
 	void Update () 
 	{
-		if (Vector2.Distance(downLevelChanger.transform.position, player1.transform.position) <= 5f && Vector2.Distance(downLevelChanger.transform.position, player2.transform.position) <= 5f && (Input.GetButtonDown("Interact")))
+		if (Vector2.Distance(downLevelChanger.transform.position, player1.transform.position) <= 2.5f && Vector2.Distance(downLevelChanger.transform.position, player2.transform.position) <= 2.5f)
 		{
-			MovePlayersToNewLevel();
+			if ((Input.GetButtonDown("Interact")) && player2DiesScript.isPlayerDead == true)
+			{
+				MovePlayersToNewLevel();
+			}
+
+			if ((Input.GetButtonDown("Interact2")) && player1DiesScript.isPlayerDead == true)
+			{
+				MovePlayersToNewLevel();
+			}
 		}
+
 
 		if ( player1DiesScript.isPlayerDead == true && player2DiesScript.isPlayerDead == true)
 		{
 			Application.Quit();
 			Debug.Log("YouGuysPoopedUp");
+		}
+
+		if (PL1.PHealth <= 0f)
+		{
+			downLevelChanger.transform.position = player1.transform.position;
+			player1.GetComponent<TurnOffOtherScripts>().TurnOffPlayerScripts();
+			player1DeadFX.SetActive(true);	
+		}
+		if (PL1.PHealth >= 0f) {player1DeadFX.SetActive(false);}
+
+		if (PL2.PHealth <= 0f)
+		{
+			downLevelChanger.transform.position = player2.transform.position;
+			player2.GetComponent<TurnOffOtherScripts>().TurnOffPlayerScripts();
+			player2DeadFX.SetActive(true);
+		}
+		if (PL2.PHealth >= 0f) {player2DeadFX.SetActive(false);}
+
+		if (PL1.PHealth<= 0f && PL2.PHealth<= 0f)
+		{
+			Debug.Log("Both players dead.");
+			Application.Quit();
 		}
 
 		// for (int i = 0; i < levelLenght; i++)
@@ -150,20 +202,34 @@ public class AIO_LevelChange : MonoBehaviour
 	{
 		previousLevels.Add(new GameObject("SubLevel0" + levelCount));
 
-			for (int i = 0; i < levelLenght; i++)
+		if (levelCount == 1)	{subLevelLenght = 3;}
+		if (levelCount == 2)	{subLevelLenght = 2;}
+		if (levelCount >= 3)	{subLevelLenght = 1;}
+
+			for (int i = 0; i < subLevelLenght; i++)
 		{
 			Instantiate(levelPieces[Random.Range(0,levelPieces.Length)], new Vector2(i * 100.0f + i * levelCount, levelCount * -100.0f), this.transform.rotation, GameObject.Find("SubLevel0" + levelCount).transform);
 		}
 
 		downLevelChanger.transform.position = downLevelChanger.transform.position - distBetweenLevels;
 
-		upLevelChanger.transform.position = upLevelChanger.transform.position - distBetweenLevels;
+		//upLevelChanger.transform.position = upLevelChanger.transform.position - distBetweenLevels;
+		float upLvlChngXpos = upLevelChanger.transform.position.x;
+
+		upLvlChngXpos = subLevelLenght * 100f;
+
+		upLevelChanger.transform.position = new Vector3(upLvlChngXpos, upLevelChanger.transform.position.y - distBetweenLevels.y, upLevelChanger.transform.position.z);
 
 		//previousLevel = GameObject.Find("SubLevel0" + (levelCount - 1));
 		currentLevel = GameObject.Find("SubLevel0" + levelCount);
 		previousLevelPlayer1PosToDestroy = GameObject.Find("player1SpawnPosition" + levelCount);
 		previousLevelPlayer2PosToDestroy = GameObject.Find("player2SpawnPosition" + levelCount);
 		GameObject.Find("SubLevel0" + (levelCount - 1)).SetActive(false);
+
+		scriptsOnOff1.TurnOnPlayerScripts();
+		PL1.PHealth = PL1.PHealthMax;
+		scriptsOnOff2.TurnOnPlayerScripts();
+		PL2.PHealth = PL2.PHealthMax;
 	}
 
 

@@ -13,17 +13,28 @@ public class EnemySpawn : MonoBehaviour
 	public RaycastHit2D rayHit;
 	public LayerMask whatLayersRayHits;
 
+	public AIO_LevelChange levelChangeScript;
+	public GameObject curLevel;
+
+	public GameObject spawnFX;
+
+	public Vector3 rayHitPoint;
+
+	//public float spawnWaitTimeAmnt = 1f;
+
 
 
 	void Start () 
 	{
-		
+		levelChangeScript = GameObject.Find("Game Manager").GetComponent<AIO_LevelChange>();
 	}
 	
 
 
 	void Update () 
 	{
+		curLevel = GameObject.Find("SubLevel0" + levelChangeScript.levelCount);
+
 		//Every couple seconds, check to see if an enemy spawns.
 		timer += Time.deltaTime;
 
@@ -35,7 +46,9 @@ public class EnemySpawn : MonoBehaviour
 				rayHit = Physics2D.Raycast(this.transform.position, Vector2.down, rayCastLenght, whatLayersRayHits);
 				if (rayHit.collider != null)
 				{
-					Instantiate(enemy, new Vector3(this.transform.position.x, rayHit.point.y + 0.5f, this.transform.position.z), enemy.transform.rotation);//enemy collider height divided by 2
+					rayHitPoint = rayHit.point;
+					Instantiate(spawnFX, new Vector3(this.transform.position.x, rayHit.point.y + 0.5f, this.transform.position.z), enemy.transform.rotation, this.transform);
+					//Instantiate(enemy, new Vector3(this.transform.position.x, rayHit.point.y + 0.5f, this.transform.position.z), enemy.transform.rotation, curLevel.transform);//enemy collider height divided by 2
 				}
 			}
 			else{Debug.Log("no enemy spawns");}

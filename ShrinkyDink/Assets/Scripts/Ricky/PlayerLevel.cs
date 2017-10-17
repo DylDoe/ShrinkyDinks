@@ -9,29 +9,54 @@ public class PlayerLevel : MonoBehaviour {
 	public float PSkillPoints;
 	public float PHealth;
 	public float PHealthMax;
-	public float PMelee;
+	//public float PMelee;
 	public float PRanged;
 
+	public float expMultReqToLvl;
+
+	public ParticleSystem pDmgFX;
+
+	public float lastPHealthAmount;
+
+
+	[HeaderAttribute("Per Level Stat Increases")]
 	public float difficultySetting;
+	public float healthPerLvl;
+	public float dmgPerLvl;
+
+	[HeaderAttribute("Starting Stats")]
+	public float startHealth;
+	public float startDamage;
 
 
 
-	// Use this for initialization
+
+
+
+
 	void Start () {
 		PLevel = 1;
-		PHealthMax = 10;
-		PMelee = 5;
-		PRanged = 5;
+		PHealthMax = startHealth;
+		//PMelee = 5;
+		PRanged = startDamage;
+		PHealth = PHealthMax;
+
+		pDmgFX = this.transform.Find("DamageTaken FX").gameObject.GetComponent<ParticleSystem>();
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
+
+	void Update () 
+	{
+		if (lastPHealthAmount > PHealth)
+		pDmgFX.Play(true);
+
+		lastPHealthAmount = PHealth;
 	}
 
 	public void ExperienceUp(){
-		if (PExperience >= PLevel * 10) {
-			PExperience -= PLevel * 10;
+		if (PExperience >= PLevel * expMultReqToLvl) 
+		{
+			PExperience -= PLevel * expMultReqToLvl;
 				LevelUp();
 		}
 	}
@@ -39,8 +64,9 @@ public class PlayerLevel : MonoBehaviour {
 	void LevelUp(){
 		PSkillPoints += difficultySetting;
 		PLevel += 1;
-		PHealthMax += 5;
-		PRanged += 2;
-		PMelee += 5;
+		PHealthMax += healthPerLvl;
+		PRanged += dmgPerLvl;
+		PHealth = PHealthMax;
+		//PMelee += 5;
 	}
 }

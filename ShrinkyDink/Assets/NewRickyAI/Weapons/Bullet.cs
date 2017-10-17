@@ -25,6 +25,8 @@ public class Bullet : MonoBehaviour {
 	//if bullet should move left
 	public bool left;
 
+	public GameObject bulletHitFX;
+
 
 	// Use this for initialization
 	void Start () {
@@ -46,34 +48,67 @@ public class Bullet : MonoBehaviour {
 
 	//Bullet collisions
 	void OnTriggerEnter2D (Collider2D other){
-		Debug.Log(other.name);
+		//Debug.Log(other.name);
 		//Destroy bullet if it hits a platform or tries to leave screen
 		if (other.name == "Platform" || other.name == "ScreenEdge" || other.tag != "Enemy") {
+			Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
 			Destroy (this.gameObject);
 			//if goThrough is active, do divided amount of damage to each enemy until goThroughNumber is zero, then destroy bullet
 		} else if (goThrough) {
-			if (goThroughNumber <= 0 && other.tag == "Enemy") {
+			if (goThroughNumber <= 0 && other.tag == "Enemy") 
+			{
+
+				if (other.gameObject.transform.Find("Shield"))
+			{
+				other.gameObject.transform.Find("Shield").GetComponent<EnemyShield>();
+
+				Destroy(this.gameObject);
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+				return;
+			}
+
 				EH = other.GetComponent<EnemyLevel> ();
 				BeforeFloat = EH.health;
 				EH.health -= damage/2;
 				AfterFloat = EH.health;
 				GiveExperience ();
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
 				Destroy (this.gameObject);
-			} else if (goThroughNumber > 0 && other.tag == "Enemy") {
+			} else if (goThroughNumber > 0 && other.tag == "Enemy") 
+			{
+				if (other.gameObject.transform.Find("Shield"))
+			{
+				other.gameObject.transform.Find("Shield").GetComponent<EnemyShield>();
+
+				Destroy(this.gameObject);
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+				return;
+			}
 				goThroughNumber -= 1;
 				EH = other.GetComponent<EnemyLevel> ();
 				BeforeFloat = EH.health;
 				EH.health -= damage/2;
 				AfterFloat = EH.health;
 				GiveExperience ();
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
 			}
 			//if goThrough is not active, do full damage and destroy bullet
-		} else if (!goThrough && other.tag == "Enemy") {
+		} else if (!goThrough && other.tag == "Enemy") 
+		{
+			if (other.gameObject.transform.Find("Shield"))
+			{
+				other.gameObject.transform.Find("Shield").GetComponent<EnemyShield>();
+
+				Destroy(this.gameObject);
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+				return;
+			}
 			EH = other.GetComponent<EnemyLevel> ();
 			BeforeFloat = EH.health;
 			EH.health -= damage;
 			AfterFloat = EH.health;
 			GiveExperience ();
+			Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
 			Destroy (this.gameObject);
 		}
 	}

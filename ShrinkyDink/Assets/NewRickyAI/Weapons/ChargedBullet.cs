@@ -39,6 +39,18 @@ public class ChargedBullet : MonoBehaviour {
 
 	public float selfDestructTime;
 	public GameObject overChargeEffect;
+	public CircleCollider2D thisCircleCollider;
+
+	public float bulletDir;
+	public bool doOnce = true;
+
+	public float chargeDmgDampner = 1f;
+	public float chargeSelfDmgDampner = 1f;
+	public float dmgItsGonDo;
+
+	public GameObject bulletHitFX;
+
+	public float chrgNeedToBrkShld = 2f;
 	
 	
 
@@ -46,9 +58,15 @@ public class ChargedBullet : MonoBehaviour {
 	{
 		shootScript = GetComponentInParent<Shoot>();
 		playerScript = transform.root.GetComponent<Player>();
+		PL = transform.root.GetComponent<PlayerLevel>();
 		m_spriteRenderer = GetComponent<SpriteRenderer>();
 		m_initialColor = m_spriteRenderer.color;
 		m_newColor = Color.red;
+		thisCircleCollider = GetComponent<CircleCollider2D>();
+		thisCircleCollider.enabled = false;
+		doOnce = true;
+
+		this.damage = PL.PRanged;
 	}
 	
 
@@ -57,6 +75,8 @@ public class ChargedBullet : MonoBehaviour {
 	{
 		transform.Rotate(new Vector3(0,0,1) * rotationMultiplier * Time.deltaTime);
 
+		dmgItsGonDo = damage * (timer / chargeDmgDampner);
+
 		if (shootScript.moveChargedBullet)
 		{
 			startMoving = true;
@@ -64,6 +84,7 @@ public class ChargedBullet : MonoBehaviour {
 
 		if(startMoving == false)
 		{
+			thisCircleCollider.enabled = false;
 			this.transform.localScale += new Vector3(0.31f * Time.deltaTime, 0.31f * Time.deltaTime, 0.31f * Time.deltaTime);
 			rotationMultiplier -= 11f;
 			m_initialColor = Color.Lerp(m_initialColor, m_newColor, 0.4f * Time.deltaTime);
@@ -72,13 +93,22 @@ public class ChargedBullet : MonoBehaviour {
 			if (timer >= selfDestructTime)
 			{
 				Instantiate(overChargeEffect, this.transform.position, this.transform.rotation);
+				PL.PHealth -= Mathf.Clamp(damage * (timer / chargeSelfDmgDampner), PL.PRanged, PL.PRanged * 5f);
 				Destroy(this.gameObject);
 			}
 		}
 
 		if (startMoving)
 		{
-			if (shootScript.lastDirectionsLastDirection < 0)
+			if (doOnce)
+			{
+				TakePlayerOrientation();
+				doOnce = false;
+			}
+
+			thisCircleCollider.enabled = true;
+
+			if (bulletDir < 0)
 			{
 				this.transform.Translate (Vector3.left * speed * Time.deltaTime, Space.World);
 			}
@@ -93,6 +123,11 @@ public class ChargedBullet : MonoBehaviour {
 		}
 		//Destroy bullet after 10 seconds
 		
+	}
+
+	void TakePlayerOrientation()
+	{
+		bulletDir = shootScript.lastDirectionsLastDirection;
 	}
 
 	//Bullet collisions
@@ -118,13 +153,37 @@ public class ChargedBullet : MonoBehaviour {
 		// 		GiveExperience ();
 		// 	}
 			//if goThrough is not active, do full damage and destroy bullet
-		  /*} else */if (/*!goThrough && */other.tag == "Enemy") {
+		if (other.tag == "Enemy") 
+		{
+			if (other.gameObject.transform.Find("Shield"))
+			{
+				EnemyShield shieldScript = other.gameObject.transform.Find("Shield").GetComponent<EnemyShield>();
+
+				if (timer > chrgNeedToBrkShld)
+				{
+					Destroy(other.gameObject.transform.Find("Shield").gameObject);
+				}
+
+				Destroy(this.gameObject);
+				Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+				return;
+			}
+
 			EH = other.GetComponent<EnemyLevel> ();
+
 			BeforeFloat = EH.health;
-			EH.health -= damage;
+			EH.health -= Mathf.Clamp(damage * (timer / chargeSelfDmgDampner), PL.PRanged, PL.PRanged * 5f);
 			AfterFloat = EH.health;
 			GiveExperience ();
+			Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+
 			//Destroy (this.gameObject);
+		}
+
+		if (other.tag == "BulletDestroyer")
+		{
+			Instantiate(bulletHitFX, this.transform.position, this.transform.rotation);
+			Destroy (this.gameObject);
 		}
 	}
 

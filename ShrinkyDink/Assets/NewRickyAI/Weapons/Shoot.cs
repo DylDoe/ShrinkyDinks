@@ -70,7 +70,6 @@ public class Shoot : MonoBehaviour {
 			{
 				Instantiate (Bullet, bulletSpawnPoint.transform.position, transform.rotation);
 			}
-
 		}
 	}
 
